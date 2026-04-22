@@ -1,0 +1,23 @@
+/*
+ * Opt-in default styles for tiptap-extension-ruby.
+ * Consumers must explicitly import this file:
+ *   import 'tiptap-extension-ruby/style.css';
+ */
+
+ruby {
+  ruby-position: over;
+  ruby-align: center;
+}
+
+ruby rt {
+  font-size: 0.6em;
+  line-height: 1;
+  user-select: none;
+}
+
+/* Browsers that support ruby-position hide the <rp> plain-text fallback. */
+@supports (ruby-position: over) {
+  ruby rp {
+    display: none;
+  }
+}
