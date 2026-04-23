@@ -10,8 +10,10 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? [['github'], ['html']] : 'html',
   snapshotDir: './visual-tests/__screenshots__',
+  // Platform-scoped baselines: CI-generated linux/ baselines are committed;
+  // local darwin/ and win32/ baselines are gitignored. See CONTRIBUTING.md.
   snapshotPathTemplate:
-    '{snapshotDir}/{projectName}/{testFileName}/{arg}{ext}',
+    '{snapshotDir}/{platform}/{projectName}/{testFileName}/{arg}{ext}',
 
   expect: {
     // Allow a tiny amount of pixel drift (sub-pixel font rendering).

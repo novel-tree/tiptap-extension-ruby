@@ -12,5 +12,7 @@ test-results
 !.vscode/extensions.json
 !.vscode/settings.json
 
-# Playwright trace artifacts (keep __screenshots__)
+# Playwright trace artifacts (keep __screenshots__/linux/)
 visual-tests/test-results
+visual-tests/__screenshots__/darwin
+visual-tests/__screenshots__/win32

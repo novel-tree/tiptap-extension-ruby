@@ -26,8 +26,8 @@ export const MultipleRubies: Story = {
 };
 
 export const LiveEditor: Story = {
-  parameters: {
-    visualTest: { skip: true },
-  },
+  // `visual-skip` tag is honored by visual-tests/ruby.spec.ts to exclude this
+  // story from screenshot regression (it mounts a live editor for manual QA).
+  tags: ['visual-skip'],
   render: () => createLiveEditor(`<p>今日は${rubyHtml('漢字', 'かんじ')}を書きます。</p>`),
 };
