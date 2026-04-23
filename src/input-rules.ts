@@ -9,7 +9,7 @@ import type { NodeType } from '@tiptap/pm/model';
  * The leading `|` disambiguates the base text, which is especially useful when
  * the base contains mixed kanji/kana. The reading is wrapped in 《》.
  */
-const RUBY_INPUT_REGEX = /\|([^\|《》\s]+)《([^《》\n]+)》$/;
+export const RUBY_INPUT_REGEX = /\|([^\|《》\s]+)《([^《》\n]+)》$/;
 
 export const rubyInputRule = ({ type }: { type: NodeType }) =>
   nodeInputRule({
