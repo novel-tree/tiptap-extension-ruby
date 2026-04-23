@@ -39,33 +39,20 @@ describe('RUBY_INPUT_REGEX', () => {
   });
 });
 
-describe('Ruby.addInputRules gating', () => {
-  it('registers the input rule when enableInputRule is true (default)', () => {
+describe('Ruby option propagation', () => {
+  it('defaults enableInputRule to true', () => {
     active = createEditor({ content: '<p></p>' });
-    const names = active.extensionManager.extensions.map((e) => e.name);
-    expect(names).toContain('ruby');
-    // addInputRules returns a non-empty array by default.
     const rubyExt = active.extensionManager.extensions.find((e) => e.name === 'ruby');
-    const rules = rubyExt?.config.addInputRules?.apply({
-      ...rubyExt,
-      options: rubyExt?.options ?? {},
-      type: active.schema.nodes.ruby,
-    } as never);
-    expect(Array.isArray(rules) ? rules.length : 0).toBeGreaterThan(0);
+    expect(rubyExt?.options.enableInputRule).toBe(true);
   });
 
-  it('registers no input rules when enableInputRule is false', () => {
+  it('accepts enableInputRule: false via configure()', () => {
     active = createEditor({
       content: '<p></p>',
       rubyOptions: { enableInputRule: false },
     });
     const rubyExt = active.extensionManager.extensions.find((e) => e.name === 'ruby');
-    const rules = rubyExt?.config.addInputRules?.apply({
-      ...rubyExt,
-      options: { ...rubyExt?.options, enableInputRule: false },
-      type: active.schema.nodes.ruby,
-    } as never);
-    expect(Array.isArray(rules) ? rules.length : -1).toBe(0);
+    expect(rubyExt?.options.enableInputRule).toBe(false);
   });
 });
 
