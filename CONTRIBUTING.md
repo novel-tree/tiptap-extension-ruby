@@ -36,15 +36,22 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/). Common t
 
 Breaking changes: `feat!:` with a `BREAKING CHANGE:` footer.
 
-## Adding a changeset
+## Releases
 
-Every user-facing change needs a changeset so Release Please can version and changelog it correctly:
+Versioning is fully automated from Conventional Commits via [release-please](https://github.com/googleapis/release-please). You don't need to hand-author anything per PR — just write a correctly typed commit message.
 
-```bash
-pnpm changeset
-```
+How it works:
 
-Follow the prompts, pick a semver bump, and commit the generated `.changeset/*.md` file alongside your code.
+1. On merge to `main`, the `Release` workflow runs release-please, which opens (or updates) a PR titled `chore(main): release X.Y.Z`. That PR bumps `package.json` and regenerates `CHANGELOG.md` from the commits since the last release.
+2. Merging the release PR creates the `vX.Y.Z` git tag and a GitHub Release whose body is the changelog entry. The workflow also builds the package and attaches the `tiptap-extension-ruby-X.Y.Z.tgz` tarball as a release asset.
+
+npm publishing is intentionally deferred — the GitHub Release + tarball is the current distribution channel.
+
+Bump rules while pre-1.0 (`bump-minor-pre-major: true`):
+
+- `feat:` → minor (`0.1.0` → `0.2.0`)
+- `fix:` → patch (`0.1.0` → `0.1.1`)
+- `feat!:` / `BREAKING CHANGE:` → still a minor bump until the first 1.0 release.
 
 ## Running tests
 
