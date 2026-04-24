@@ -59,6 +59,7 @@
     "release": "pnpm build && changeset publish",
     "prepublishOnly": "pnpm build"
   },
+  "prepare": "npm run build",
   "peerDependencies": {
     "@tiptap/core": "^3.0.0",
     "@tiptap/pm": "^3.0.0"

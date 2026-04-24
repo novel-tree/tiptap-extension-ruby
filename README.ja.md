@@ -1,0 +1,90 @@
+# tiptap-extension-ruby
+
+[![npm version](https://img.shields.io/npm/v/tiptap-extension-ruby.svg)](https://www.npmjs.com/package/tiptap-extension-ruby)
+[![CI](https://github.com/novel-tree/tiptap-extension-ruby/actions/workflows/ci.yml/badge.svg)](https://github.com/novel-tree/tiptap-extension-ruby/actions/workflows/ci.yml)
+[![MIT license](https://img.shields.io/npm/l/tiptap-extension-ruby.svg)](./LICENSE)
+
+CJK のテキストに HTML `<ruby>` 注釈（ふりがな / 振り仮名）を付与するための TipTap v3 拡張です。
+
+> English version: [README.md](./README.md).
+
+## インストール
+
+```bash
+pnpm add tiptap-extension-ruby
+# または: npm install tiptap-extension-ruby
+# または: yarn add tiptap-extension-ruby
+```
+
+peerDependencies: `@tiptap/core` と `@tiptap/pm`（どちらも `^3.0.0`）。
+
+## クイックスタート
+
+```ts
+import { Editor } from '@tiptap/core';
+import Document from '@tiptap/extension-document';
+import Paragraph from '@tiptap/extension-paragraph';
+import Text from '@tiptap/extension-text';
+import { Ruby } from 'tiptap-extension-ruby';
+import 'tiptap-extension-ruby/style.css'; // 任意: デフォルトスタイル
+
+const editor = new Editor({
+  element: document.querySelector('#editor')!,
+  extensions: [Document, Paragraph, Text, Ruby],
+  content: '<p><ruby>漢字<rt>かんじ</rt></ruby></p>',
+});
+
+editor.commands.setRuby({ rb: '先生', rt: 'せんせい' });
+```
+
+## オプション
+
+`Ruby.configure({...})` で設定します。
+
+| オプション          | 型                        | 既定値 | 説明                                                                     |
+| ------------------- | ------------------------- | ------ | ------------------------------------------------------------------------ |
+| `HTMLAttributes`    | `Record<string, unknown>` | `{}`   | レンダリングされる `<ruby>` 要素にマージする属性。                       |
+| `enableInputRule`   | `boolean`                 | `true` | `\|漢字《かんじ》` 入力ルールの有効/無効。                               |
+| `renderRpFallback`  | `boolean`                 | `true` | `<rt>` の前後に `<rp>(</rp>` / `<rp>)</rp>` を出力してフォールバックに。 |
+
+## コマンド
+
+| コマンド                 | シグネチャ                                 | 振る舞い                                                 |
+| ------------------------ | ------------------------------------------ | -------------------------------------------------------- |
+| `setRuby({ rb, rt })`    | `(payload: SetRubyPayload) => boolean`     | 現在のカーソル位置に ruby ノードを挿入。                 |
+| `toggleRuby({ rb, rt })` | `(payload: SetRubyPayload) => boolean`     | 選択中のテキストを ruby で囲む、または既存の ruby を解除。|
+| `unsetRuby()`            | `() => boolean`                            | カーソル位置の ruby を解除し、base 文字列だけを残す。    |
+
+戻り値はドキュメントを変更した場合のみ `true`、それ以外は `false` です。
+
+## 入力ルール
+
+[青空文庫](https://www.aozora.gr.jp/) 記法に着想を得ています。
+
+```
+|漢字《かんじ》
+```
+
+base に漢字とかなが混在するケースを明確化するため、先頭に `|` を付けます。ペースト時にも同じ記法が認識され、1 回のペーストに含まれる複数トークンは 1 トランザクションで変換されます。
+
+## スタイリング
+
+モダンブラウザで `<rp>` フォールバックを非表示にする任意の既定スタイルを同梱しています。
+
+```ts
+import 'tiptap-extension-ruby/style.css';
+```
+
+独自のデザインシステムを持つ場合はインポートをスキップし、`ruby` / `rt` / `rp` を直接スタイリングしてください。
+
+## 対応ブラウザ
+
+モダンなエバーグリーンブラウザ（Chrome / Firefox / Safari / Edge）。`<rp>` フォールバックにより、プレーンテキストのリーダーでも `漢字(かんじ)` として判読できます。Internet Explorer は対応していません。
+
+## コントリビュート
+
+開発セットアップ、テスト、ビジュアル回帰の運用については [CONTRIBUTING.md](./CONTRIBUTING.md) を参照してください。
+
+## ライセンス
+
+[MIT](./LICENSE) © Michael Kenji Wilkins
