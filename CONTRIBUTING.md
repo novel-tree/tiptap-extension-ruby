@@ -43,15 +43,15 @@ Versioning is fully automated from Conventional Commits via [release-please](htt
 How it works:
 
 1. On merge to `main`, the `Release` workflow runs release-please, which opens (or updates) a PR titled `chore(main): release X.Y.Z`. That PR bumps `package.json` and regenerates `CHANGELOG.md` from the commits since the last release.
-2. Merging the release PR creates the `vX.Y.Z` git tag and a GitHub Release whose body is the changelog entry. The workflow also builds the package and attaches the `tiptap-extension-ruby-X.Y.Z.tgz` tarball as a release asset.
+2. Merging the release PR creates the `vX.Y.Z` git tag and a GitHub Release whose body is the changelog entry. The workflow then publishes the package to npm (`tiptap-extension-ruby@X.Y.Z`, with provenance) and attaches the `tiptap-extension-ruby-X.Y.Z.tgz` tarball as a release asset.
 
-npm publishing is intentionally deferred — the GitHub Release + tarball is the current distribution channel.
+Required secret: `NPM_TOKEN` (npm automation token with publish access). Provenance is generated via the workflow's OIDC token — no extra config needed beyond the `id-token: write` permission already on the workflow.
 
-Bump rules while pre-1.0 (`bump-minor-pre-major: true`):
+Bump rules (standard semver post-1.0):
 
-- `feat:` → minor (`0.1.0` → `0.2.0`)
-- `fix:` → patch (`0.1.0` → `0.1.1`)
-- `feat!:` / `BREAKING CHANGE:` → still a minor bump until the first 1.0 release.
+- `feat:` → minor (`1.0.0` → `1.1.0`)
+- `fix:` → patch (`1.0.0` → `1.0.1`)
+- `feat!:` / `BREAKING CHANGE:` → major (`1.0.0` → `2.0.0`)
 
 ## Running tests
 
