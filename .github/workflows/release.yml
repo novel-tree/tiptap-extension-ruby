@@ -3,12 +3,19 @@ name: Release
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to (re)publish (e.g. v1.0.0). Leave blank to run release-please normally.'
+        required: false
+        default: ''
 
 concurrency: release-${{ github.ref }}
 
 permissions:
   contents: write
   pull-requests: write
+  id-token: write
 
 env:
   PNPM_VERSION: 10.23.0
@@ -19,37 +26,57 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: release
+        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.tag == '') }}
         uses: googleapis/release-please-action@v4
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
+      - id: target
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ inputs.tag }}" ]]; then
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+            echo "tag_name=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ steps.release.outputs.release_created }}" == "true" ]]; then
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+            echo "tag_name=${{ steps.release.outputs.tag_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/checkout@v4
-        if: ${{ steps.release.outputs.release_created == 'true' }}
+        if: ${{ steps.target.outputs.should_publish == 'true' }}
         with:
-          ref: ${{ steps.release.outputs.tag_name }}
+          ref: ${{ steps.target.outputs.tag_name }}
 
       - uses: pnpm/action-setup@v4
-        if: ${{ steps.release.outputs.release_created == 'true' }}
+        if: ${{ steps.target.outputs.should_publish == 'true' }}
         with:
           version: ${{ env.PNPM_VERSION }}
 
       - uses: actions/setup-node@v4
-        if: ${{ steps.release.outputs.release_created == 'true' }}
+        if: ${{ steps.target.outputs.should_publish == 'true' }}
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
+          registry-url: https://registry.npmjs.org
 
       - name: Install, build, and pack
-        if: ${{ steps.release.outputs.release_created == 'true' }}
+        if: ${{ steps.target.outputs.should_publish == 'true' }}
         run: |
           pnpm install --frozen-lockfile
           pnpm build
           pnpm pack --pack-destination ./pack
 
+      - name: Publish to npm
+        if: ${{ steps.target.outputs.should_publish == 'true' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm publish --access public --no-git-checks --provenance
+
       - name: Attach tarball to GitHub Release
-        if: ${{ steps.release.outputs.release_created == 'true' }}
+        if: ${{ steps.target.outputs.should_publish == 'true' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ steps.release.outputs.tag_name }}
+          TAG: ${{ steps.target.outputs.tag_name }}
         run: gh release upload "$TAG" ./pack/*.tgz --clobber
