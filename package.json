@@ -1,6 +1,6 @@
 {
   "name": "tiptap-extension-ruby",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "A TipTap v3 extension that adds Ruby (furigana) annotations for CJK text.",
   "keywords": [
     "tiptap",
