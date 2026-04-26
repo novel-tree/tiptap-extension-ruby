@@ -38,20 +38,29 @@ Breaking changes: `feat!:` with a `BREAKING CHANGE:` footer.
 
 ## Releases
 
-Versioning is fully automated from Conventional Commits via [release-please](https://github.com/googleapis/release-please). You don't need to hand-author anything per PR — just write a correctly typed commit message.
+Versioning and publishing are fully automated from Conventional Commits via [semantic-release](https://semantic-release.gitbook.io/). You don't hand-author anything per PR — just write a correctly typed commit message and merge.
 
-How it works:
+Two channels:
 
-1. On merge to `main`, the `Release` workflow runs release-please, which opens (or updates) a PR titled `chore(main): release X.Y.Z`. That PR bumps `package.json` and regenerates `CHANGELOG.md` from the commits since the last release.
-2. Merging the release PR creates the `vX.Y.Z` git tag and a GitHub Release whose body is the changelog entry. The workflow then publishes the package to npm (`tiptap-extension-ruby@X.Y.Z`, with provenance) and attaches the `tiptap-extension-ruby-X.Y.Z.tgz` tarball as a release asset.
+- `main` → npm `latest` + GitHub Release (stable)
+- `develop` → npm `beta` + GitHub pre-release
 
-Required secret: `NPM_TOKEN` (npm automation token with publish access). Provenance is generated via the workflow's OIDC token — no extra config needed beyond the `id-token: write` permission already on the workflow.
+Workflow:
 
-Bump rules (standard semver post-1.0):
+1. Open your PR into `develop`. PR CI (`ci.yml`) runs lint / typecheck / unit / build / visual.
+2. On merge to `develop`, the `Release` workflow runs CI again then `semantic-release`, which (if there are release-worthy commits) cuts a `vX.Y.Z-beta.N` tag, publishes `tiptap-extension-ruby@X.Y.Z-beta.N` to npm under the `beta` dist-tag (with provenance), and creates a GitHub pre-release. It also commits the bumped `package.json` and updated `CHANGELOG.md` back to `develop` with `[skip ci]`.
+3. When you're ready to promote, open a `develop → main` PR. Merging it produces a stable `vX.Y.Z` tag, npm `latest` publish, and a regular GitHub Release.
+
+Bump rules:
 
 - `feat:` → minor (`1.0.0` → `1.1.0`)
 - `fix:` → patch (`1.0.0` → `1.0.1`)
 - `feat!:` / `BREAKING CHANGE:` → major (`1.0.0` → `2.0.0`)
+- `chore:`, `ci:`, `docs:`, `test:`, `refactor:` → no release
+
+Required secret: `NPM_TOKEN` (npm **automation** token — required for CI provenance, since automation tokens skip 2FA). Provenance is generated via the workflow's OIDC token — no extra config needed beyond the `id-token: write` permission already on the workflow.
+
+Branch protection caveat: semantic-release pushes a back-commit to `main`/`develop` using `GITHUB_TOKEN`. If branch protection later requires PR review or signed commits on these branches, swap to a GitHub App token via `actions/create-github-app-token`.
 
 ## Running tests
 

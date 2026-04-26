@@ -20,7 +20,6 @@ pnpm storybook        # dev server on :6006 (required for visual tests locally)
 pnpm storybook:build  # static bundle (CI feeds this to Playwright)
 pnpm test:visual      # playwright test (spawns Storybook locally via webServer)
 pnpm test:visual:update  # regenerate local snapshots
-pnpm changeset        # add a changeset entry — required for any src/ change
 ```
 
 Run a single unit test: `pnpm test tests/unit/commands.test.ts` — or narrow with `-t "pattern"` to match a describe/it name.
@@ -51,6 +50,9 @@ This is a single-package TipTap v3 extension published as `tiptap-extension-ruby
 
 ## Workflow conventions
 
-- **Conventional Commits** are required (`feat:`, `fix:`, `test:`, `docs:`, `chore:`, `ci:`; `feat!:` for breaking).
-- **Every user-facing change needs a changeset.** `pnpm changeset` creates the file; commit it with your code. Release automation (`.github/workflows/release.yml`) runs changesets/action on pushes to `main` — it opens a "Version packages" PR, and merging that PR publishes to npm.
+- **Conventional Commits** are required (`feat:`, `fix:`, `test:`, `docs:`, `chore:`, `ci:`; `feat!:` for breaking). The release flow reads commit messages directly — there is no changeset file.
+- **Two-branch release model** driven by `semantic-release` (`.releaserc.json`, `.github/workflows/release.yml`):
+  - Merge to `develop` → npm `beta` + GitHub pre-release (`vX.Y.Z-beta.N`)
+  - Merge to `main` → npm `latest` + stable GitHub Release (`vX.Y.Z`)
+  - No release PR in the middle. Publishing happens on push; semantic-release back-commits the new `package.json` + `CHANGELOG.md` with `[skip ci]`.
 - One logical change per PR; tests ship with the code they cover.
