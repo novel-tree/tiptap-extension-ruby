@@ -1,5 +1,5 @@
 {
-  "name": "tiptap-extension-ruby",
+  "name": "@novel-tree/tiptap-extension-ruby",
   "version": "1.0.1",
   "description": "A TipTap v3 extension that adds Ruby (furigana) annotations for CJK text.",
   "keywords": [
@@ -20,6 +20,10 @@
   },
   "bugs": {
     "url": "https://github.com/novel-tree/tiptap-extension-ruby/issues"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
   },
   "type": "module",
   "main": "./dist/index.cjs",
@@ -53,6 +57,9 @@
     "test:watch": "vitest",
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build",
+    "storybook:test-server": "pnpm storybook:build && pnpm exec http-server storybook-static -p 6006 -s",
+    "example:react": "pnpm --dir examples/react-vite dev",
+    "example:react:build": "pnpm --dir examples/react-vite build",
     "test:visual": "playwright test",
     "test:visual:update": "playwright test --update-snapshots",
     "prepublishOnly": "pnpm build"

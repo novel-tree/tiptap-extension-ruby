@@ -20,7 +20,7 @@ tests/              Vitest unit tests + happy-dom helpers + HTML fixtures
 stories/            Storybook stories (HTML framework)
 visual-tests/       Playwright visual regression spec
 .storybook/         Storybook config
-examples/           Runnable vanilla + React usage examples
+examples/           Local verification sandboxes, including React + Vite
 ```
 
 ## Commit messages
@@ -42,14 +42,15 @@ Versioning and publishing are fully automated from Conventional Commits via [sem
 
 Two channels:
 
-- `main` → npm `latest` + GitHub Release (stable)
-- `develop` → npm `beta` + GitHub pre-release
+- `main` → GitHub Packages stable publish + GitHub Release
+- `develop` → GitHub Packages `beta` publish + GitHub pre-release
+- `codex/phase1-gpr-beta` → GitHub Packages `beta` publish + GitHub pre-release
 
 Workflow:
 
 1. Open your PR into `develop`. PR CI (`ci.yml`) runs lint / typecheck / unit / build / visual.
-2. On merge to `develop`, the `Release` workflow runs CI again then `semantic-release`, which (if there are release-worthy commits) cuts a `vX.Y.Z-beta.N` tag, publishes `tiptap-extension-ruby@X.Y.Z-beta.N` to npm under the `beta` dist-tag (with provenance), and creates a GitHub pre-release. It also commits the bumped `package.json` and updated `CHANGELOG.md` back to `develop` with `[skip ci]`.
-3. When you're ready to promote, open a `develop → main` PR. Merging it produces a stable `vX.Y.Z` tag, npm `latest` publish, and a regular GitHub Release.
+2. On merge to `develop` or push to `codex/phase1-gpr-beta`, the `Release` workflow runs CI again then `semantic-release`, which (if there are release-worthy commits) cuts a `vX.Y.Z-beta.N` tag, publishes `@novel-tree/tiptap-extension-ruby@X.Y.Z-beta.N` to GitHub Packages under the `beta` dist-tag, and creates a GitHub pre-release. It also commits the bumped `package.json` and updated `CHANGELOG.md` back to the release branch with `[skip ci]`.
+3. When you're ready to promote, open a `develop → main` PR. Merging it produces a stable `vX.Y.Z` tag, GitHub Packages stable publish, and a regular GitHub Release.
 
 Bump rules:
 
@@ -58,7 +59,7 @@ Bump rules:
 - `feat!:` / `BREAKING CHANGE:` → major (`1.0.0` → `2.0.0`)
 - `chore:`, `ci:`, `docs:`, `test:`, `refactor:` → no release
 
-Required secret: `NPM_TOKEN` (npm **automation** token — required for CI provenance, since automation tokens skip 2FA). Provenance is generated via the workflow's OIDC token — no extra config needed beyond the `id-token: write` permission already on the workflow.
+Authentication: GitHub Packages publishing uses the workflow `GITHUB_TOKEN` via `NODE_AUTH_TOKEN`. Consumers need access to the repository and an `.npmrc` entry for the `@novel-tree` scope.
 
 Branch protection caveat: semantic-release pushes a back-commit to `main`/`develop` using `GITHUB_TOKEN`. If branch protection later requires PR review or signed commits on these branches, swap to a GitHub App token via `actions/create-github-app-token`.
 
@@ -72,6 +73,7 @@ pnpm test:coverage   # Unit suite + v8 coverage report
 pnpm storybook       # Storybook dev server at http://localhost:6006
 pnpm storybook:build # Static Storybook bundle (required for visual tests)
 pnpm test:visual     # Playwright visual regression against committed baselines
+pnpm example:react   # React + Vite sandbox for selection-first ruby authoring
 ```
 
 Running `pnpm test:visual` locally will launch Storybook via the `webServer` option in `playwright.config.ts`.
@@ -87,7 +89,6 @@ Screenshots are the source of truth for ruby rendering correctness. A few notes:
 ## Pull requests
 
 - One logical change per PR. Unit tests and the code they test ship together.
-- Include a changeset (`pnpm changeset`) if you touch `src/`.
 - Fill out the PR template; flag whether your change needs updated screenshots.
 
 ## Reporting bugs / requesting features

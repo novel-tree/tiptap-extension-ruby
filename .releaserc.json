@@ -2,7 +2,8 @@
   "$schema": "https://json.schemastore.org/semantic-release.json",
   "branches": [
     "main",
-    { "name": "develop", "channel": "beta", "prerelease": "beta" }
+    { "name": "develop", "channel": "beta", "prerelease": "beta" },
+    { "name": "codex/phase1-gpr-beta", "channel": "beta", "prerelease": "beta" }
   ],
   "plugins": [
     "@semantic-release/commit-analyzer",
