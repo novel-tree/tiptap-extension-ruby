@@ -44,12 +44,11 @@ Two channels:
 
 - `main` → GitHub Packages stable publish + GitHub Release
 - `develop` → GitHub Packages `beta` publish + GitHub pre-release
-- `codex/phase1-gpr-beta` → GitHub Packages `beta` publish + GitHub pre-release
 
 Workflow:
 
 1. Open your PR into `develop`. PR CI (`ci.yml`) runs lint / typecheck / unit / build / visual.
-2. On merge to `develop` or push to `codex/phase1-gpr-beta`, the `Release` workflow runs CI again then `semantic-release`, which (if there are release-worthy commits) cuts a `vX.Y.Z-beta.N` tag, publishes `@novel-tree/tiptap-extension-ruby@X.Y.Z-beta.N` to GitHub Packages under the `beta` dist-tag, and creates a GitHub pre-release. It also commits the bumped `package.json` and updated `CHANGELOG.md` back to the release branch with `[skip ci]`.
+2. On merge to `develop`, the `Release` workflow runs CI again then `semantic-release`, which (if there are release-worthy commits) cuts a `vX.Y.Z-beta.N` tag, publishes `@novel-tree/tiptap-extension-ruby@X.Y.Z-beta.N` to GitHub Packages under the `beta` dist-tag, and creates a GitHub pre-release. It also commits the bumped `package.json` and updated `CHANGELOG.md` back to the release branch with `[skip ci]`.
 3. When you're ready to promote, open a `develop → main` PR. Merging it produces a stable `vX.Y.Z` tag, GitHub Packages stable publish, and a regular GitHub Release.
 
 Bump rules:
@@ -59,9 +58,7 @@ Bump rules:
 - `feat!:` / `BREAKING CHANGE:` → major (`1.0.0` → `2.0.0`)
 - `chore:`, `ci:`, `docs:`, `test:`, `refactor:` → no release
 
-Authentication: GitHub Packages publishing uses the workflow `GITHUB_TOKEN` via `NODE_AUTH_TOKEN`. Consumers need access to the repository and an `.npmrc` entry for the `@novel-tree` scope.
-
-Branch protection caveat: semantic-release pushes a back-commit to `main`/`develop` using `GITHUB_TOKEN`. If branch protection later requires PR review or signed commits on these branches, swap to a GitHub App token via `actions/create-github-app-token`.
+Authentication: GitHub Packages publishing uses the workflow token via `NODE_AUTH_TOKEN`. GitHub Releases and semantic-release back-commits use a GitHub App installation token created by `actions/create-github-app-token`, so branch protection can keep requiring pull requests for human users.
 
 ## Running tests
 
