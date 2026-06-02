@@ -1,9 +1,40 @@
 import type { Command } from '@tiptap/core';
+import type { EditorState } from '@tiptap/pm/state';
+import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
+import { NodeSelection } from '@tiptap/pm/state';
 
 import type { SetRubyPayload } from './types';
 import { sanitizeReading } from './utils/validate';
 
 const NODE_NAME = 'ruby';
+
+interface RubyTarget {
+  node: ProseMirrorNode;
+  pos: number;
+}
+
+const findRubyTarget = (state: EditorState): RubyTarget | null => {
+  const { selection } = state;
+  const { $from, from } = selection;
+
+  if (selection instanceof NodeSelection && selection.node.type.name === NODE_NAME) {
+    return { node: selection.node, pos: from };
+  }
+
+  const nodeAfter = $from.nodeAfter;
+  if (nodeAfter?.type.name === NODE_NAME) {
+    return { node: nodeAfter, pos: from };
+  }
+
+  if (!selection.empty) return null;
+
+  const nodeBefore = $from.nodeBefore;
+  if (nodeBefore?.type.name === NODE_NAME) {
+    return { node: nodeBefore, pos: from - nodeBefore.nodeSize };
+  }
+
+  return null;
+};
 
 export const setRuby =
   (payload: SetRubyPayload): Command =>
@@ -27,11 +58,9 @@ export const toggleRuby =
   (payload: SetRubyPayload): Command =>
   (props) => {
     const { state } = props;
-    const { $from } = state.selection;
 
-    // If the selection sits on a ruby node, strip it.
-    const nodeAfter = $from.nodeAfter;
-    if (nodeAfter && nodeAfter.type.name === NODE_NAME) {
+    // If the selection touches a ruby node, strip it.
+    if (findRubyTarget(state)) {
       return unsetRuby()(props);
     }
 
@@ -50,14 +79,12 @@ export const toggleRuby =
 export const unsetRuby =
   (): Command =>
   ({ state, dispatch, tr }) => {
-    const { $from } = state.selection;
-    const nodeAfter = $from.nodeAfter;
-    if (!nodeAfter || nodeAfter.type.name !== NODE_NAME) return false;
+    const target = findRubyTarget(state);
+    if (!target) return false;
 
-    const rb = (nodeAfter.attrs as { rb?: string }).rb ?? '';
+    const rb = (target.node.attrs as { rb?: string }).rb ?? '';
     if (dispatch) {
-      const pos = $from.pos;
-      tr.replaceWith(pos, pos + nodeAfter.nodeSize, state.schema.text(rb || ' '));
+      tr.replaceWith(target.pos, target.pos + target.node.nodeSize, state.schema.text(rb || ' '));
       dispatch(tr);
     }
     return true;
