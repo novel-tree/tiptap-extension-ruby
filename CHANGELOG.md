@@ -1,3 +1,10 @@
+# [1.1.0-beta.2](https://github.com/novel-tree/tiptap-extension-ruby/compare/v1.1.0-beta.1...v1.1.0-beta.2) (2026-06-02)
+
+
+### Bug Fixes
+
+* unwrap ruby when the cursor is after the node ([5421111](https://github.com/novel-tree/tiptap-extension-ruby/commit/5421111f5885ba55f7cceda9fdd7b8ef3fe518c5))
+
 # [1.1.0-beta.1](https://github.com/novel-tree/tiptap-extension-ruby/compare/v1.0.0...v1.1.0-beta.1) (2026-06-02)
 
 
