@@ -54,6 +54,15 @@ describe('toggleRuby', () => {
     expect(editor.getHTML()).toBe('<p>漢字</p>');
   });
 
+  it('unwraps an existing ruby when the cursor is positioned after it', () => {
+    const editor = make({ content: '<p></p>' });
+    editor.commands.setRuby({ rb: '漢字', rt: 'かんじ' });
+    editor.commands.setTextSelection(2);
+    const result = editor.commands.toggleRuby({ rb: '', rt: '' });
+    expect(result).toBe(true);
+    expect(editor.getHTML()).toBe('<p>漢字</p>');
+  });
+
   it('uses selected text as rb when payload rb is empty', () => {
     const editor = make({ content: '<p>漢字</p>' });
     // Select "漢字" (positions 1..3 — paragraph opens at 1, each char = 1).
@@ -83,6 +92,15 @@ describe('unsetRuby', () => {
     const editor = make({ content: '<p></p>' });
     editor.commands.setRuby({ rb: '漢字', rt: 'かんじ' });
     editor.commands.setTextSelection(1);
+    const result = editor.commands.unsetRuby();
+    expect(result).toBe(true);
+    expect(editor.getHTML()).toBe('<p>漢字</p>');
+  });
+
+  it('unwraps ruby when cursor is positioned after it', () => {
+    const editor = make({ content: '<p></p>' });
+    editor.commands.setRuby({ rb: '漢字', rt: 'かんじ' });
+    editor.commands.setTextSelection(2);
     const result = editor.commands.unsetRuby();
     expect(result).toBe(true);
     expect(editor.getHTML()).toBe('<p>漢字</p>');
