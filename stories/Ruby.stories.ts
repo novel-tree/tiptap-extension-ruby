@@ -29,5 +29,17 @@ export const LiveEditor: Story = {
   // `visual-skip` tag is honored by visual-tests/ruby.spec.ts to exclude this
   // story from screenshot regression (it mounts a live editor for manual QA).
   tags: ['visual-skip'],
-  render: () => createLiveEditor(`<p>今日は${rubyHtml('漢字', 'かんじ')}を書きます。</p>`),
+  render: () =>
+    createLiveEditor(`<p>今日は${rubyHtml('漢字', 'かんじ')}を書きます。</p>`, {
+      hint: 'Try typing or pasting: |漢字《かんじ》',
+    }),
+};
+
+export const LiveEditorInputRuleDisabled: Story = {
+  tags: ['visual-skip'],
+  render: () =>
+    createLiveEditor('<p></p>', {
+      hint: 'Input rule disabled. Typing |漢字《かんじ》 should stay as plain text.',
+      rubyOptions: { enableInputRule: false },
+    }),
 };

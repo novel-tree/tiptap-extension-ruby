@@ -1,6 +1,6 @@
 {
-  "name": "tiptap-extension-ruby",
-  "version": "1.0.0",
+  "name": "@novel-tree/tiptap-extension-ruby",
+  "version": "1.0.1",
   "description": "A TipTap v3 extension that adds Ruby (furigana) annotations for CJK text.",
   "keywords": [
     "tiptap",
@@ -20,6 +20,10 @@
   },
   "bugs": {
     "url": "https://github.com/novel-tree/tiptap-extension-ruby/issues"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
   },
   "type": "module",
   "main": "./dist/index.cjs",
@@ -53,11 +57,13 @@
     "test:watch": "vitest",
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build",
+    "storybook:test-server": "pnpm storybook:build && pnpm exec http-server storybook-static -p 6006 -s",
+    "example:react": "pnpm --dir examples/react-vite dev",
+    "example:react:build": "pnpm --dir examples/react-vite build",
     "test:visual": "playwright test",
     "test:visual:update": "playwright test --update-snapshots",
     "prepublishOnly": "pnpm build"
   },
-  "prepare": "npm run build",
   "peerDependencies": {
     "@tiptap/core": "^3.0.0",
     "@tiptap/pm": "^3.0.0"
@@ -66,6 +72,8 @@
     "@eslint/js": "^9.17.0",
     "@fontsource/noto-sans-jp": "^5.2.9",
     "@playwright/test": "^1.49.1",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
     "@storybook/addon-essentials": "^8.6.14",
     "@storybook/html": "^8.6.18",
     "@storybook/html-vite": "^8.6.18",
@@ -84,6 +92,7 @@
     "happy-dom": "^15.11.7",
     "http-server": "^14.1.1",
     "prettier": "^3.4.2",
+    "semantic-release": "^24.2.0",
     "storybook": "^8.6.18",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",

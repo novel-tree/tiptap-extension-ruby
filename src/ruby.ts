@@ -2,8 +2,13 @@ import { Node, mergeAttributes } from '@tiptap/core';
 import type { DOMOutputSpec } from '@tiptap/pm/model';
 
 import { setRuby, toggleRuby, unsetRuby } from './commands';
-import { rubyInputRule } from './input-rules';
-import { rubyPasteRule } from './paste-rules';
+import { rubyInputRules } from './input-rules';
+import { rubyPasteRules } from './paste-rules';
+import {
+  DEFAULT_SHORTHAND_RULE,
+  type RubyShorthandOptions,
+  type RubyShorthandRule,
+} from './shorthand';
 import { parseRubyElement } from './utils/parse-ruby-html';
 
 export interface RubyOptions {
@@ -13,8 +18,13 @@ export interface RubyOptions {
   HTMLAttributes: Record<string, unknown>;
   /**
    * Enable the Aozora-Bunko-style `|漢字《かんじ》` input rule.
+   * Deprecated: prefer `shorthand.enabled`.
    */
   enableInputRule: boolean;
+  /**
+   * Configure locale-friendly shorthand rules for input/paste conversion.
+   */
+  shorthand: RubyShorthandOptions;
   /**
    * Emit `<rp>(</rp>` / `<rp>)</rp>` fallbacks around `<rt>` for
    * browsers/readers that don't support ruby rendering.
@@ -26,6 +36,9 @@ export interface RubyAttributes {
   rb: string;
   rt: string;
 }
+
+const normalizeShorthandRules = (rules: RubyShorthandRule[]): RubyShorthandRule[] =>
+  rules.filter((rule) => rule.trigger && rule.open && rule.close);
 
 const NODE_NAME = 'ruby';
 
@@ -41,6 +54,10 @@ export const Ruby = Node.create<RubyOptions>({
     return {
       HTMLAttributes: {},
       enableInputRule: true,
+      shorthand: {
+        enabled: true,
+        rules: [DEFAULT_SHORTHAND_RULE],
+      },
       renderRpFallback: true,
     };
   },
@@ -101,11 +118,14 @@ export const Ruby = Node.create<RubyOptions>({
   },
 
   addInputRules() {
-    if (!this.options.enableInputRule) return [];
-    return [rubyInputRule({ type: this.type })];
+    if (!this.options.enableInputRule || !this.options.shorthand.enabled) return [];
+    const rules = normalizeShorthandRules(this.options.shorthand.rules);
+    return rubyInputRules({ rules, type: this.type });
   },
 
   addPasteRules() {
-    return [rubyPasteRule({ type: this.type })];
+    if (!this.options.shorthand.enabled) return [];
+    const rules = normalizeShorthandRules(this.options.shorthand.rules);
+    return rubyPasteRules({ rules, type: this.type });
   },
 });

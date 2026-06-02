@@ -47,7 +47,7 @@ export default defineConfig({
   webServer: process.env.CI
     ? undefined
     : {
-        command: 'pnpm storybook --ci',
+        command: 'pnpm storybook:test-server',
         url: STORYBOOK_URL,
         reuseExistingServer: true,
         timeout: 120_000,
